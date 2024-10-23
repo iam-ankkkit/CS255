@@ -1,0 +1,115 @@
+
+<!--  Ankit Sanjel --CS 255-- Midterm Video Assignment -- Professor GP Corser -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Amortization Calculator</title>
+</head>
+<body>
+    <h2>Loan and Amortization Calculator</h2>
+    <form id="loanForm">
+        
+        <label for="borrowingYear1">Borrowing Year 1:</label>
+        <input type="number" id="borrowingYear1" required><br><br>
+
+        <label for="loanAmt1">Loan Amount 1:</label>
+        <input type="number" id="loanAmt1" step="0.01" required><br><br>
+		
+         <!-- Borrowing Year 2 now disabled and automatically calculated based on Year 1 down in the Calcbutton function -->
+
+        <label for="borrowingYear2">Borrowing Year 2:</label>
+        <input type="number" id="borrowingYear2" disabled><br><br>
+
+        <label for="loanAmt2">Loan Amount 2:</label>
+        <input type="number" id="loanAmt2" step="0.01" required><br><br>
+
+        <label for="borrowingYear3">Borrowing Year 3:</label>
+        <input type="number" id="borrowingYear3" disabled><br><br>
+
+        <label for="loanAmt3">Loan Amount 3:</label>
+        <input type="number" id="loanAmt3" step="0.01" required><br><br>
+
+        <label for="borrowingYear4">Borrowing Year 4:</label>
+        <input type="number" id="borrowingYear4" disabled><br><br>
+
+        <label for="loanAmt4">Loan Amount 4:</label>
+        <input type="number" id="loanAmt4" step="0.01" required><br><br>
+		
+        <button type="button" onclick="calculateDebt()">Calculate</button>
+    </form>
+	
+    <h3>Results</h3>
+    <p id="totalDebt">Total Debt: </p>
+
+    <!-- Making a Table to display the amortization schedule -->
+    <table id="amortizationTable" border="1"> 
+        <thead>
+            <tr>
+                <th>Year</th>
+                <th>Payment</th>
+                <th>Interest Amount</th>
+                <th>Principal Amount</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        function calculateDebt() {
+            
+            const borrowingYear1 = parseInt(document.getElementById('borrowingYear1').value);
+            const loanAmt1 = parseFloat(document.getElementById('loanAmt1').value);
+            const loanAmt2 = parseFloat(document.getElementById('loanAmt2').value);
+            const loanAmt3 = parseFloat(document.getElementById('loanAmt3').value);
+            const loanAmt4 = parseFloat(document.getElementById('loanAmt4').value);
+
+            //We re calculating the Borrowing Year 2 to 3 based on year 1
+            document.getElementById('borrowingYear2').value = borrowingYear1 + 1; 
+            document.getElementById('borrowingYear3').value = borrowingYear1 + 2; 
+            document.getElementById('borrowingYear4').value = borrowingYear1 + 3; 
+
+            const interestRate = 0.05; 
+
+            
+            const yearsBetween1and4 = 3; 
+			
+            let totalDebt = loanAmt1 * Math.pow(1 + interestRate, yearsBetween1and4) +  
+                            loanAmt2 * Math.pow(1 + interestRate, yearsBetween1and4 - 1) +  
+                            loanAmt3 * Math.pow(1 + interestRate, yearsBetween1and4 - 2) +  
+                            loanAmt4;  // Loan 4 has no interest yet.
+
+            const repaymentYears = 10; 
+
+            const amortization = (totalDebt * interestRate) / (1 - Math.pow(1 + interestRate, -repaymentYears));
+
+            
+            document.getElementById('totalDebt').textContent = `Total Debt: $${totalDebt.toFixed(2)}`;
+
+            // Clearing any existing rows from the table
+				const tableBody = document.querySelector("#amortizationTable tbody");
+            tableBody.innerHTML = " "; // This clears all the  previous results before displaying new ones
+
+            // calculating and displaying the amortization schedule for each repayment year
+            let remainingDebt = totalDebt; // Starts with the total debt amount
+            for (let year = 1; year <= repaymentYears; year++) {
+                const interestPayment = remainingDebt * interestRate; // Interests for the current year
+                const principalPayment = amortization - interestPayment; // Principal paid off for the current year
+                remainingDebt -= principalPayment; // Update remaining debt by reducing the principal
+
+                // Creating a a new row for each year and appending  it to the table
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>Year ${year}</td>
+                    <td>$${amortization.toFixed(2)}</td>
+                    <td>$${interestPayment.toFixed(2)}</td>
+                    <td>$${principalPayment.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row); // Add the row to the table body
+            }
+        }
+    </script>
+</body>
+</html>
